@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Curlime</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #8b5cf6;
+    --bg-primary: #0f0f23;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --surface: #1e1e3f;
+    --surface-hover: #252550;
+    --border: #2d2d5a;
+    --border-hover: #4338ca;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-hover: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  .app-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    position: relative;
+  }
+
+  /* Animated background */
+  .app-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Header */
+  .header {
+    padding: 1.5rem 2rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(30, 30, 63, 0.5);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--gradient);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  .logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .settings-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Main content */
+  .main-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem 2rem;
+    position: relative;
+    z-index: 1;
+    min-height: 0; /* Allow grid to shrink */
+    overflow: hidden; /* Prevent content from pushing layout */
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-height: 0; /* Allow panel to shrink */
+    overflow: hidden; /* Prevent overflow from breaking layout */
+  }
+
+  .panel:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .panel-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    opacity: 0;
+  }
+
+  .panel:hover .copy-btn {
+    opacity: 1;
+  }
+
+  .copy-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    transform: scale(1.1);
+  }
+
+  .copy-btn[data-copied="true"] {
+    color: var(--success);
+  }
+
+  /* Input and textarea styles */
+  textarea, .output {
+    flex: 1;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    resize: none;
+    transition: all 0.2s ease;
+    min-height: 0; /* Allow to shrink */
+    overflow-y: auto; /* Enable scrolling when content overflows */
+  }
+
+  textarea {
+    font-family: 'Inter', sans-serif;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .output {
+    white-space: pre-wrap;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-primary);
+    word-wrap: break-word; /* Break long lines */
+    overflow-wrap: break-word; /* Modern browsers */
+    hyphens: auto; /* Enable hyphenation if needed */
+  }
+
+  .output.code {
+    color: #e2e8f0;
+    background: #0d1117;
+    border: 1px solid #21262d;
+  }
+
+  /* Action buttons */
+  .action-bar {
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: flex-start;
+    gap: 1rem;
+    background: rgba(30, 30, 63, 0.5);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:not(:disabled):hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:not(:disabled):hover {
+    background: var(--gradient-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Modal styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 15, 35, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    min-width: 400px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+  }
+
+  .modal h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .input-group:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .input-group input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+  }
+
+  .input-group input:focus {
+    outline: none;
+  }
+
+  .input-group button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .input-group button:hover {
+    color: var(--text-primary);
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .status-message {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--success);
+    text-align: right;
+  }
+
+  /* Loading states */
+  .loading {
+    position: relative;
+  }
+
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--border);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main-content {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto;
+    }
+    
+    .header {
+      padding: 1rem;
+    }
+    
+    .main-content {
+      padding: 1rem;
+    }
+  }
+
+  /* SVG Icons */
+  .icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+  }
+
+  .icon-copy::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') center/contain no-repeat;
+  }
+
+  .icon-check::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="20,6 9,17 4,12"/></svg>') center/contain no-repeat;
+  }
+
+  .icon-settings::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>') center/contain no-repeat;
+  }
+
+  .icon-eye::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>') center/contain no-repeat;
+  }
+
+  .icon-play::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('data:image/svg+xml;utf8,<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon points="5,3 19,12 5,21"/></svg>') center/contain no-repeat;
+  }
+
+  .icon-magic::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M4 20l16-16m-5.5 1l1-3 1 3 3 1-3 1-1 3-1-3-3-1 3-1zM2 22l6-6" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>') center/contain no-repeat;
+  }
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">C</div>
+        <h1>Curlime</h1>
+      </div>
+      <div class="header-actions">
+        <button id="settings-btn" class="settings-btn" title="Settings">
+          <span class="icon icon-settings"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Input Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Input Text</h3>
+          <button class="copy-btn" data-copy="input" title="Copy">
+            <span class="icon icon-copy"></span>
+          </button>
+        </div>
+        <textarea id="input" placeholder="Paste your text here..."></textarea>
+      </div>
+
+      <!-- Prompt Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Transformation Prompt</h3>
+          <button class="copy-btn" data-copy="prompt" title="Copy">
+            <span class="icon icon-copy"></span>
+          </button>
+        </div>
+        <textarea id="prompt" placeholder="Describe what you want to do... e.g., 'extract all email addresses' or 'convert to JSON format'"></textarea>
+      </div>
+      
+      <!-- Code Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Generated Code</h3>
+          <button class="copy-btn" data-copy="code" title="Copy">
+            <span class="icon icon-copy"></span>
+          </button>
+        </div>
+        <div id="code" class="output code">// AI-generated transformation code will appear here...</div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Result</h3>
+          <button class="copy-btn" data-copy="result" title="Copy">
+            <span class="icon icon-copy"></span>
+          </button>
+        </div>
+        <div id="result" class="output">Your transformed text will appear here...</div>
+      </div>
+
+    </main>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button id="generate-btn" class="btn btn-secondary">
+        <span class="icon icon-magic"></span>
+        Generate
+      </button>
+      <button id="run-btn" class="btn btn-primary" disabled>
+        <span class="icon icon-play"></span>
+        Execute
+      </button>
+    </div>
+  </div>
+
+  <!-- API Key Modal -->
+  <div id="api-key-modal" class="modal">
+    <div class="modal-content">
+      <h2>API Configuration</h2>
+      <div class="form-group">
+        <label class="form-label" for="api-key-input">Anthropic Claude API Key</label>
+        <div class="input-group">
+          <input type="password" id="api-key-input" autocomplete="off" placeholder="sk-ant-..." />
+          <button id="toggle-api-key" type="button" title="Show/Hide">
+            <span class="icon icon-eye"></span>
+          </button>
+        </div>
+        <div id="api-key-status" class="status-message"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancel-api-key">Cancel</button>
+        <button class="btn btn-primary" id="save-api-key">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const generateCode = window.electron.generateCode;
+    const runJS = window.electron.runJS;
+
+    // Main functionality
+    const $ = id => document.getElementById(id);
+
+    $("generate-btn").onclick = async () => {
+      $("run-btn").disabled = true;
+      const code = await generateCode($("input").value, $("prompt").value, "js");
+      $("code").textContent = code;
+      $("run-btn").disabled = false;
+    };
+
+    $("run-btn").onclick = async () => {
+      try {
+        const out = await runJS($("code").textContent, $("input").value);
+        $("result").textContent = out;
+      } catch (e) {
+        $("result").textContent = "⚠️ Error: " + e.message;
+      }
+    };
+
+    // Copy functionality
+    function copyPanel(id) {
+      const el = document.getElementById(id);
+      let value = "";
+      if (!el) return;
+      if (el.tagName === "TEXTAREA") {
+        value = el.value;
+      } else {
+        value = el.textContent;
+      }
+      navigator.clipboard.writeText(value).then(() => {
+        // Visual feedback handled by button state
+      });
+    }
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.onclick = e => {
+        const id = btn.getAttribute('data-copy');
+        copyPanel(id);
+        btn.setAttribute('data-copied', 'true');
+        btn.innerHTML = '<span class="icon icon-check"></span>';
+        setTimeout(() => {
+          btn.setAttribute('data-copied', 'false');
+          btn.innerHTML = '<span class="icon icon-copy"></span>';
+        }, 2000);
+      };
+    });
+
+    // Modal functionality
+    const apiKeyModal = document.getElementById('api-key-modal');
+    const apiKeyInput = document.getElementById('api-key-input');
+    const toggleApiKey = document.getElementById('toggle-api-key');
+    const saveApiKey = document.getElementById('save-api-key');
+    const cancelApiKey = document.getElementById('cancel-api-key');
+    const apiKeyStatus = document.getElementById('api-key-status');
+    const settingsBtn = document.getElementById('settings-btn');
+
+    function showApiKeyModal() {
+      apiKeyInput.value = ''; // In real app, load from storage
+      apiKeyInput.type = 'password';
+      apiKeyStatus.textContent = '';
+      apiKeyModal.style.display = 'flex';
+      apiKeyInput.focus();
+    }
+
+    function hideApiKeyModal() {
+      apiKeyModal.style.display = 'none';
+    }
+
+    settingsBtn.onclick = showApiKeyModal;
+    cancelApiKey.onclick = hideApiKeyModal;
+
+    toggleApiKey.onclick = () => {
+      if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+      } else {
+        apiKeyInput.type = 'password';
+      }
+      apiKeyInput.focus();
+    };
+
+    saveApiKey.onclick = () => {
+      // In real app, save to storage
+      apiKeyStatus.textContent = 'Configuration saved successfully!';
+      setTimeout(hideApiKeyModal, 1000);
+    };
+
+    // Close modal on outside click
+    apiKeyModal.onclick = (e) => {
+      if (e.target === apiKeyModal) {
+        hideApiKeyModal();
+      }
+    };
+
+    // Demo data for showcase
+    setTimeout(() => {
+      $("input").value = `john.doe@example.com
+      Jane Smith <jane@company.co.uk>
+      Contact: bob123@test-domain.org
+      Email me at: alice.wilson@startup.io`;
+      
+      $("prompt").value = "extract all email addresses and format them as a clean list";
+    }, 1000);
+  </script>
+</body>
+</html>
