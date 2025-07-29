@@ -19,13 +19,10 @@
 
 ## 🚧 Roadmap / Upcoming Features
 
-- [ ] **Multi-language Support**: Add more languages for code generation and execution.
+- [ ] **Save Transformation**: Save generated transformations to reuse next time.
 - [ ] **History & Undo**: View and restore previous prompts, inputs, and results.
-- [ ] **Dark Mode**: Toggle between light and dark themes.
 - [ ] **Export/Import**: Save and load sessions or code snippets.
-- [ ] **Better Error Handling**: Friendlier error messages and troubleshooting tips.
 - [ ] **Drag & Drop**: Support for dropping files as input.
-- [ ] **Settings Panel**: UI for configuring app preferences.
 - [ ] **In-app Updates**: Notify users of new versions and features.
 
 ---
@@ -37,7 +34,7 @@
    npm install
    ```
 2. **Set your Anthropic Claude API key:**
-   - Add `ANTHROPIC_API_KEY=your-key-here` to a `.env` file or your environment.
+   - Click on Setting button in the app UI and save your API key
 3. **Run the app:**
    ```bash
    npm start
