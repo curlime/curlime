@@ -115,6 +115,27 @@
     gap: 1rem;
   }
 
+  .provider-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .provider-badge.claude {
+    background: rgba(255, 119, 198, 0.2);
+    color: #ff77c6;
+    border: 1px solid rgba(255, 119, 198, 0.3);
+  }
+
+  .provider-badge.ollama {
+    background: rgba(120, 219, 255, 0.2);
+    color: #78dbff;
+    border: 1px solid rgba(120, 219, 255, 0.3);
+  }
+
   .settings-btn {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -145,8 +166,8 @@
     padding: 1.5rem 2rem 2rem;
     position: relative;
     z-index: 1;
-    min-height: 0; /* Allow grid to shrink */
-    overflow: hidden; /* Prevent content from pushing layout */
+    min-height: 0;
+    overflow: hidden;
   }
 
   .panel {
@@ -159,8 +180,8 @@
     position: relative;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    min-height: 0; /* Allow panel to shrink */
-    overflow: hidden; /* Prevent overflow from breaking layout */
+    min-height: 0;
+    overflow: hidden;
   }
 
   .panel:hover {
@@ -193,7 +214,7 @@
     padding: 0.5rem;
     border-radius: 6px;
     transition: all 0.2s ease;
-    opacity: 0;
+    opacity: 1;
   }
 
   .panel:hover .copy-btn {
@@ -222,8 +243,8 @@
     line-height: 1.6;
     resize: none;
     transition: all 0.2s ease;
-    min-height: 0; /* Allow to shrink */
-    overflow-y: auto; /* Enable scrolling when content overflows */
+    min-height: 0;
+    overflow-y: auto;
   }
 
   textarea {
@@ -245,9 +266,9 @@
     overflow-y: auto;
     font-family: 'JetBrains Mono', monospace;
     background: var(--bg-primary);
-    word-wrap: break-word; /* Break long lines */
-    overflow-wrap: break-word; /* Modern browsers */
-    hyphens: auto; /* Enable hyphenation if needed */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   .output.code {
@@ -336,7 +357,7 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 2rem;
-    min-width: 400px;
+    min-width: 450px;
     max-width: 90vw;
     box-shadow: var(--shadow-lg);
     position: relative;
@@ -359,6 +380,59 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
+  }
+
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .switch.active {
+    background: var(--primary);
+  }
+
+  .switch-handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  .switch.active .switch-handle {
+    transform: translateX(26px);
+  }
+
+  .provider-labels {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .provider-label {
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+  }
+
+  .provider-label.active {
+    color: var(--text-primary);
+    font-weight: 600;
   }
 
   .input-group {
@@ -411,8 +485,45 @@
   .status-message {
     margin-top: 0.5rem;
     font-size: 0.875rem;
-    color: var(--success);
     text-align: right;
+  }
+
+  .status-message.success {
+    color: var(--success);
+  }
+
+  .status-message.error {
+    color: var(--error);
+  }
+
+  .status-message.warning {
+    color: var(--warning);
+  }
+
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-dot.success {
+    background: var(--success);
+  }
+
+  .status-dot.error {
+    background: var(--error);
+  }
+
+  .status-dot.warning {
+    background: var(--warning);
   }
 
   /* Loading states */
@@ -467,7 +578,7 @@
     display: block;
     width: 16px;
     height: 16px;
-    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') center/contain no-repeat;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') center/contain no-repeat;
   }
 
   .icon-check::before {
@@ -475,7 +586,7 @@
     display: block;
     width: 16px;
     height: 16px;
-    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="20,6 9,17 4,12"/></svg>') center/contain no-repeat;
+    background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polyline points="20,6 9,17 4,12"/></svg>') center/contain no-repeat;
   }
 
   .icon-settings::before {
@@ -520,6 +631,7 @@
         <h1>Curlime</h1>
       </div>
       <div class="header-actions">
+        <div id="provider-badge" class="provider-badge ollama">Ollama</div>
         <button id="settings-btn" class="settings-btn" title="Settings">
           <span class="icon icon-settings"></span>
         </button>
@@ -587,11 +699,33 @@
     </div>
   </div>
 
-  <!-- API Key Modal -->
-  <div id="api-key-modal" class="modal">
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
     <div class="modal-content">
       <h2>API Configuration</h2>
+      
+      <!-- Provider Selection -->
       <div class="form-group">
+        <label class="form-label">AI Provider</label>
+        <div class="toggle-switch">
+          <div class="provider-labels">
+            <span id="ollama-label" class="provider-label active">Local Ollama</span>
+          </div>
+          <div id="provider-switch" class="switch">
+            <div class="switch-handle"></div>
+          </div>
+          <div class="provider-labels">
+            <span id="claude-label" class="provider-label">Anthropic Claude</span>
+          </div>
+        </div>
+        <div id="provider-status" class="connection-status">
+          <div class="status-dot warning"></div>
+          <span>Checking connection...</span>
+        </div>
+      </div>
+
+      <!-- API Key Configuration (only shown for Claude) -->
+      <div id="api-key-section" class="form-group" style="display: none;">
         <label class="form-label" for="api-key-input">Anthropic Claude API Key</label>
         <div class="input-group">
           <input type="password" id="api-key-input" autocomplete="off" placeholder="sk-ant-..." />
@@ -601,30 +735,129 @@
         </div>
         <div id="api-key-status" class="status-message"></div>
       </div>
+
       <div class="modal-actions">
-        <button class="btn btn-secondary" id="cancel-api-key">Cancel</button>
-        <button class="btn btn-primary" id="save-api-key">Save Configuration</button>
+        <button class="btn btn-secondary" id="cancel-settings">Cancel</button>
+        <button class="btn btn-primary" id="save-settings">Save Configuration</button>
       </div>
     </div>
   </div>
 
   <script>
-    const generateCode = window.electron.generateCode;
-    const runJS = window.electron.runJS;
+    // Configuration state
+    let currentConfig = {
+      provider: 'ollama', // 'ollama' or 'claude'
+      apiKey: ''
+    };
 
     // Main functionality
     const $ = id => document.getElementById(id);
 
+    // Load saved configuration
+    function loadConfig() {
+      // In a real app, load from persistent storage
+      // For now, default to ollama
+      updateProviderUI();
+      checkProviderStatus();
+    }
+
+    function updateProviderUI() {
+      const badge = $('provider-badge');
+      const switchEl = $('provider-switch');
+      const ollamaLabel = $('ollama-label');
+      const claudeLabel = $('claude-label');
+      const apiKeySection = $('api-key-section');
+
+      if (currentConfig.provider === 'claude') {
+        badge.textContent = 'Claude';
+        badge.className = 'provider-badge claude';
+        switchEl.classList.add('active');
+        ollamaLabel.classList.remove('active');
+        claudeLabel.classList.add('active');
+        apiKeySection.style.display = 'block';
+      } else {
+        badge.textContent = 'Ollama';
+        badge.className = 'provider-badge ollama';
+        switchEl.classList.remove('active');
+        ollamaLabel.classList.add('active');
+        claudeLabel.classList.remove('active');
+        apiKeySection.style.display = 'none';
+      }
+    }
+
+    async function checkProviderStatus() {
+      const statusEl = $('provider-status');
+      const statusDot = statusEl.querySelector('.status-dot');
+      const statusText = statusEl.querySelector('span');
+
+      statusDot.className = 'status-dot warning';
+      statusText.textContent = 'Checking connection...';
+
+      if (currentConfig.provider === 'ollama') {
+        try {
+          const health = await window.electron.checkBackendHealth();
+          if (health.status === 'healthy') {
+            statusDot.className = 'status-dot success';
+            statusText.textContent = 'Ollama backend connected';
+          } else {
+            statusDot.className = 'status-dot error';
+            statusText.textContent = 'Ollama backend not available';
+          }
+        } catch (error) {
+          statusDot.className = 'status-dot error';
+          statusText.textContent = 'Connection failed';
+        }
+      } else {
+        if (currentConfig.apiKey) {
+          try {
+            const isConnected = await window.electron.testClaudeConnection(currentConfig.apiKey);
+            if (isConnected) {
+              statusDot.className = 'status-dot success';
+              statusText.textContent = 'Claude API connected';
+            } else {
+              statusDot.className = 'status-dot error';
+              statusText.textContent = 'Invalid API key';
+            }
+          } catch (error) {
+            statusDot.className = 'status-dot error';
+            statusText.textContent = 'Connection failed';
+          }
+        } else {
+          statusDot.className = 'status-dot error';
+          statusText.textContent = 'API key required';
+        }
+      }
+    }
+
     $("generate-btn").onclick = async () => {
-      $("run-btn").disabled = true;
-      const code = await generateCode($("input").value, $("prompt").value, "js");
-      $("code").textContent = code;
-      $("run-btn").disabled = false;
+      const input = $("input").value;
+      const prompt = $("prompt").value;
+      
+      if (!input.trim() || !prompt.trim()) {
+        $("result").textContent = "⚠️ Please provide both input text and transformation prompt";
+        return;
+      }
+
+      try {
+        $("generate-btn").disabled = true;
+        $("run-btn").disabled = true;
+        $("code").textContent = "Generating code...";
+        
+        const code = await window.electron.generateCode(input, prompt, "js", currentConfig);
+        $("code").textContent = code;
+        $("run-btn").disabled = false;
+      } catch (error) {
+        $("code").textContent = "⚠️ Error: " + error.message;
+        $("run-btn").disabled = true;
+      } finally {
+        $("generate-btn").disabled = false;
+      }
     };
 
     $("run-btn").onclick = async () => {
       try {
-        const out = await runJS($("code").textContent, $("input").value);
+        $("result").textContent = "Running transformation...";
+        const out = await window.electron.runJS($("code").textContent, $("input").value);
         $("result").textContent = out;
       } catch (e) {
         $("result").textContent = "⚠️ Error: " + e.message;
@@ -660,29 +893,42 @@
     });
 
     // Modal functionality
-    const apiKeyModal = document.getElementById('api-key-modal');
+    const settingsModal = document.getElementById('settings-modal');
     const apiKeyInput = document.getElementById('api-key-input');
     const toggleApiKey = document.getElementById('toggle-api-key');
-    const saveApiKey = document.getElementById('save-api-key');
-    const cancelApiKey = document.getElementById('cancel-api-key');
+    const saveSettings = document.getElementById('save-settings');
+    const cancelSettings = document.getElementById('cancel-settings');
     const apiKeyStatus = document.getElementById('api-key-status');
     const settingsBtn = document.getElementById('settings-btn');
+    const providerSwitch = document.getElementById('provider-switch');
 
-    function showApiKeyModal() {
-      apiKeyInput.value = ''; // In real app, load from storage
+    function showSettingsModal() {
+      apiKeyInput.value = currentConfig.apiKey;
       apiKeyInput.type = 'password';
       apiKeyStatus.textContent = '';
-      apiKeyModal.style.display = 'flex';
-      apiKeyInput.focus();
+      updateProviderUI();
+      checkProviderStatus();
+      settingsModal.style.display = 'flex';
+      if (currentConfig.provider === 'claude') {
+        apiKeyInput.focus();
+      }
     }
 
-    function hideApiKeyModal() {
-      apiKeyModal.style.display = 'none';
+    function hideSettingsModal() {
+      settingsModal.style.display = 'none';
     }
 
-    settingsBtn.onclick = showApiKeyModal;
-    cancelApiKey.onclick = hideApiKeyModal;
+    settingsBtn.onclick = showSettingsModal;
+    cancelSettings.onclick = hideSettingsModal;
 
+    // Provider switch
+    providerSwitch.onclick = () => {
+      currentConfig.provider = currentConfig.provider === 'ollama' ? 'claude' : 'ollama';
+      updateProviderUI();
+      checkProviderStatus();
+    };
+
+    // API key toggle
     toggleApiKey.onclick = () => {
       if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
@@ -692,16 +938,50 @@
       apiKeyInput.focus();
     };
 
-    saveApiKey.onclick = () => {
-      // In real app, save to storage
-      apiKeyStatus.textContent = 'Configuration saved successfully!';
-      setTimeout(hideApiKeyModal, 1000);
+    // Save configuration
+    saveSettings.onclick = async () => {
+      if (currentConfig.provider === 'claude') {
+        const apiKey = apiKeyInput.value.trim();
+        if (!apiKey) {
+          apiKeyStatus.textContent = 'API key is required for Claude';
+          apiKeyStatus.className = 'status-message error';
+          return;
+        }
+        
+        // Test the API key
+        apiKeyStatus.textContent = 'Testing API key...';
+        apiKeyStatus.className = 'status-message';
+        
+        try {
+          const isValid = await window.electron.testClaudeConnection(apiKey);
+          if (isValid) {
+            currentConfig.apiKey = apiKey;
+            apiKeyStatus.textContent = 'Configuration saved successfully!';
+            apiKeyStatus.className = 'status-message success';
+          } else {
+            apiKeyStatus.textContent = 'Invalid API key';
+            apiKeyStatus.className = 'status-message error';
+            return;
+          }
+        } catch (error) {
+          apiKeyStatus.textContent = 'Failed to test API key';
+          apiKeyStatus.className = 'status-message error';
+          return;
+        }
+      } else {
+        apiKeyStatus.textContent = 'Configuration saved successfully!';
+        apiKeyStatus.className = 'status-message success';
+      }
+      
+      // In a real app, save to persistent storage
+      updateProviderUI();
+      setTimeout(hideSettingsModal, 1000);
     };
 
     // Close modal on outside click
-    apiKeyModal.onclick = (e) => {
-      if (e.target === apiKeyModal) {
-        hideApiKeyModal();
+    settingsModal.onclick = (e) => {
+      if (e.target === settingsModal) {
+        hideSettingsModal();
       }
     };
 
@@ -714,6 +994,9 @@
       
       $("prompt").value = "extract all email addresses and format them as a clean list";
     }, 1000);
+
+    // Initialize
+    loadConfig();
   </script>
 </body>
 </html>
