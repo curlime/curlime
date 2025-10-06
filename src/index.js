@@ -58,7 +58,9 @@ const CLAUDE_HEADERS = {
   "content-type": "application/json"
 };
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3001';
+// Local Ollama configuration (no external backend required)
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-coder:6.7b';
 
 // Remove the old fetch import and add a fallback for older Node.js
 const fetch = (typeof global.fetch === 'function') ? global.fetch : (...args) => import('node-fetch').then(mod => mod.default(...args));
@@ -105,57 +107,67 @@ async function generateCodeWithClaude(input, prompt, lang, apiKey) {
   return code.trim();
 }
 
+function createSystemPrompt(lang) {
+  return `You are a code generator. \n+ Output ONLY valid ${lang.toUpperCase()} wrapped in triple backticks. \n+ The code must define a function transform(text) that returns a string.\n+ Do not include any explanations or comments outside the code block.\n+ Ensure the function is complete and ready to execute.`;
+}
+
+function createUserPrompt(input, prompt) {
+  return `Input text:\n<<<\n${input}\n>>>\n\nUser prompt: ${prompt}`;
+}
+
 async function generateCodeWithOllama(input, prompt, lang, apiKey = null) {
   if (!input || !prompt || !lang) {
     throw new Error("Missing input, prompt, or language");
   }
 
-  const body = {
-    input: input,
-    prompt: prompt,
-    lang: lang
+  const systemPrompt = createSystemPrompt(lang);
+  const userPrompt = createUserPrompt(input, prompt);
+
+  const payload = {
+    model: OLLAMA_MODEL,
+    prompt: `${systemPrompt}\n\nUser: ${userPrompt}\n\nAssistant:`,
+    stream: false,
+    options: {
+      temperature: 0.1,
+      top_p: 0.9,
+      num_predict: 1024,
+      stop: ["User:", "Human:", "\n\nUser:", "\n\nHuman:"]
+    }
   };
 
   const headers = {
     'Content-Type': 'application/json'
   };
 
-  // Add API key if provided (for future authentication if needed)
+  // Optional future auth header; currently unused for local Ollama
   if (apiKey) {
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  console.log('Calling backend API:', `${BACKEND_API_URL}/api/generate-code`);
+  console.log('Calling Ollama directly:', `${OLLAMA_URL}/api/generate`, 'model:', OLLAMA_MODEL);
 
   try {
-    const response = await fetch(`${BACKEND_API_URL}/api/generate-code`, {
+    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(payload)
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-    }
 
     const data = await response.json();
 
-    if (!data.success) {
-      throw new Error(data.error || 'Code generation failed');
+    if (!response.ok) {
+      throw new Error(data?.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    console.log('Generated code successfully using:', data.provider, data.model);
-    return data.code;
+    const raw = data.response || '';
+    const code = raw.match(/```[a-z]*\s*([\s\S]*?)```/)?.[1] ?? raw;
+    return code.trim();
 
   } catch (error) {
-    console.error('Backend API error:', error.message);
-    
-    // Fallback error message
+    console.error('Ollama call failed:', error.message);
     if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
-      throw new Error('Backend API is not running. Please start the backend server.');
+      throw new Error('Ollama is not reachable. Ensure `ollama serve` is running.');
     }
-    
     throw error;
   }
 }
@@ -174,39 +186,43 @@ async function generateCode(input, prompt, lang, config) {
   }
 }
 
-// Health check function for Ollama backend
+// Health check function for local Ollama
 async function checkBackendHealth() {
   try {
-    const response = await fetch(`${BACKEND_API_URL}/api/health`, {
-      method: 'GET',
-      timeout: 5000
-    });
-
-    if (response.ok) {
-      const health = await response.json();
-      console.log('Backend health check:', health);
-      return health;
-    } else {
-      throw new Error(`Health check failed: ${response.status}`);
+    const response = await fetch(`${OLLAMA_URL}/api/tags`, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+    const data = await response.json();
+    const models = Array.isArray(data?.models) ? data.models.map(m => m.name) : [];
+    const health = {
+      status: 'healthy',
+      provider: 'OLLAMA',
+      model: OLLAMA_MODEL,
+      models,
+      timestamp: new Date().toISOString()
+    };
+    console.log('Ollama health check:', health);
+    return health;
   } catch (error) {
-    console.error('Backend health check failed:', error.message);
-    return { status: 'unhealthy', error: error.message };
+    console.error('Ollama health check failed:', error.message);
+    return { status: 'unhealthy', provider: 'OLLAMA', model: OLLAMA_MODEL, error: error.message };
   }
 }
 
-// Get available models from Ollama backend
+// Get available models from local Ollama
 async function getAvailableModels() {
   try {
-    const response = await fetch(`${BACKEND_API_URL}/api/models`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.models;
+    const response = await fetch(`${OLLAMA_URL}/api/tags`, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+    const data = await response.json();
+    return Array.isArray(data?.models) ? data.models.map(m => m.name) : [];
   } catch (error) {
-    console.error('Failed to fetch models:', error.message);
+    console.error('Failed to fetch models from Ollama:', error.message);
+    return [];
   }
-  return [];
 }
 
 // Test Claude API connection
@@ -276,10 +292,11 @@ app.whenReady().then(async () => {
   setTimeout(async () => {
     const health = await checkBackendHealth();
     if (health.status !== 'healthy') {
-      console.warn('⚠️  Backend API is not healthy. Ollama code generation may not work properly.');
-      console.log('📋 Make sure to start the backend server with: node backend-api.js');
+      console.warn('⚠️  Ollama is not healthy or not reachable.');
+      console.log('📋 Ensure Ollama is running: `ollama serve`');
+      console.log(`📋 Optionally pull the model: ollama pull ${OLLAMA_MODEL}`);
     } else {
-      console.log('✅ Backend API is healthy and ready!');
+      console.log('✅ Ollama is healthy and ready!');
     }
   }, 1000);
 });

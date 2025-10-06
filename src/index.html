@@ -670,7 +670,7 @@
             <span class="icon icon-copy"></span>
           </button>
         </div>
-        <div id="code" class="output code">// AI-generated transformation code will appear here...</div>
+        <textarea id="code" class="output code" placeholder="// AI-generated transformation code will appear here..."></textarea>
       </div>
 
       <!-- Output Panel -->
@@ -841,13 +841,13 @@
       try {
         $("generate-btn").disabled = true;
         $("run-btn").disabled = true;
-        $("code").textContent = "Generating code...";
+        $("code").value = "Generating code...";
         
         const code = await window.electron.generateCode(input, prompt, "js", currentConfig);
-        $("code").textContent = code;
+        $("code").value = code;
         $("run-btn").disabled = false;
       } catch (error) {
-        $("code").textContent = "⚠️ Error: " + error.message;
+        $("code").value = "⚠️ Error: " + error.message;
         $("run-btn").disabled = true;
       } finally {
         $("generate-btn").disabled = false;
@@ -857,7 +857,7 @@
     $("run-btn").onclick = async () => {
       try {
         $("result").textContent = "Running transformation...";
-        const out = await window.electron.runJS($("code").textContent, $("input").value);
+        const out = await window.electron.runJS($("code").value, $("input").value);
         $("result").textContent = out;
       } catch (e) {
         $("result").textContent = "⚠️ Error: " + e.message;
