@@ -157,17 +157,162 @@
   }
 
   /* Main content */
-  .main-content {
+  /* Shell with left library rail, center runboard, right history rail */
+  .main-shell {
     flex: 1;
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr) 320px; /* left rail, center, right rail */
+    grid-template-rows: 1fr;
+    gap: 0;
+    min-height: 0;
+  }
+
+  .library-rail {
+    border-right: 1px solid var(--border);
+    background: rgba(30, 30, 63, 0.35);
+    padding: 1rem 0.75rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .library-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .library-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .library-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .library-search input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    width: 100%;
+  }
+
+  .library-list {
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .library-item {
+    padding: 0.75rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .library-item .meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  .runboard {
+    padding: 1.5rem 1rem 2rem 1rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .runboard-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-strip {
+    display: flex;
+    gap: 0.5rem;
+    overflow: auto;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-chip {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+
+  .main-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 1.5rem;
-    padding: 1.5rem 2rem 2rem;
-    position: relative;
-    z-index: 1;
+    gap: 1rem;
     min-height: 0;
+  }
+
+  .history-rail {
+    border-left: 1px solid var(--border);
+    background: rgba(30, 30, 63, 0.35);
+    padding: 1rem 1rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
     overflow: hidden;
+  }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .history-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .history-list {
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .history-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
   }
 
   .panel {
@@ -635,56 +780,92 @@
         <button id="settings-btn" class="settings-btn" title="Settings">
           <span class="icon icon-settings"></span>
         </button>
+        <button id="history-btn" class="settings-btn" title="History">
+          <span class="icon icon-eye"></span>
+        </button>
+        <button id="saved-btn" class="settings-btn" title="Saved">
+          <span class="icon icon-copy"></span>
+        </button>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
-      <!-- Input Panel -->
-      <div class="panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Input Text</h3>
-          <button class="copy-btn" data-copy="input" title="Copy">
-            <span class="icon icon-copy"></span>
-          </button>
+    <div class="main-shell">
+      <!-- Left: Library rail -->
+      <aside class="library-rail">
+        <div class="library-header">
+          <h3 class="library-title">Library</h3>
+          <button class="btn btn-secondary" style="padding:0.4rem 0.75rem;">New</button>
         </div>
-        <textarea id="input" placeholder="Paste your text here..."></textarea>
-      </div>
+        <div class="library-search">
+          <input id="library-search" placeholder="Search transforms" />
+        </div>
+        <div class="library-list" id="library-list">
+          
+        </div>
+      </aside>
 
-      <!-- Prompt Panel -->
-      <div class="panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Transformation Prompt</h3>
-          <button class="copy-btn" data-copy="prompt" title="Copy">
-            <span class="icon icon-copy"></span>
-          </button>
+      <!-- Center: Runboard -->
+      <section class="runboard">
+        <div class="runboard-topbar">
+          <div class="quick-strip" id="quick-strip"></div>
         </div>
-        <textarea id="prompt" placeholder="Describe what you want to do... e.g., 'extract all email addresses' or 'convert to JSON format'"></textarea>
-      </div>
-      
-      <!-- Code Panel -->
-      <div class="panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Generated Code</h3>
-          <button class="copy-btn" data-copy="code" title="Copy">
-            <span class="icon icon-copy"></span>
-          </button>
-        </div>
-        <textarea id="code" class="output code" placeholder="// AI-generated transformation code will appear here..."></textarea>
-      </div>
+        <main class="main-content">
+          <!-- Input Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Input Text</h3>
+              <button class="copy-btn" data-copy="input" title="Copy">
+                <span class="icon icon-copy"></span>
+              </button>
+            </div>
+            <textarea id="input" placeholder="Paste your text here..."></textarea>
+          </div>
 
-      <!-- Output Panel -->
-      <div class="panel">
-        <div class="panel-header">
-          <h3 class="panel-title">Result</h3>
-          <button class="copy-btn" data-copy="result" title="Copy">
-            <span class="icon icon-copy"></span>
-          </button>
-        </div>
-        <div id="result" class="output">Your transformed text will appear here...</div>
-      </div>
+          <!-- Prompt Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Transformation Prompt</h3>
+              <button class="copy-btn" data-copy="prompt" title="Copy">
+                <span class="icon icon-copy"></span>
+              </button>
+            </div>
+            <textarea id="prompt" placeholder="Describe what you want to do... e.g., 'extract all email addresses' or 'convert to JSON format'"></textarea>
+          </div>
+          
+          <!-- Code Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Generated Code</h3>
+              <button class="copy-btn" data-copy="code" title="Copy">
+                <span class="icon icon-copy"></span>
+              </button>
+            </div>
+            <textarea id="code" class="output code" placeholder="// AI-generated transformation code will appear here..."></textarea>
+          </div>
 
-    </main>
+          <!-- Output Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Result</h3>
+              <button class="copy-btn" data-copy="result" title="Copy">
+                <span class="icon icon-copy"></span>
+              </button>
+            </div>
+            <div id="result" class="output">Your transformed text will appear here...</div>
+          </div>
+        </main>
+      </section>
+
+      <!-- Right: History rail -->
+      <aside class="history-rail">
+        <div class="history-header">
+          <h3 class="history-title">History</h3>
+          <button class="btn btn-secondary" style="padding:0.4rem 0.75rem;">Filter</button>
+        </div>
+        <div class="history-list" id="history-rail-list"></div>
+      </aside>
+    </div>
 
     <!-- Action Bar -->
     <div class="action-bar">
@@ -692,6 +873,10 @@
         <span class="icon icon-magic"></span>
         Generate
       </button>
+    <button id="save-btn" class="btn btn-secondary">
+      <span class="icon icon-copy"></span>
+      Save Transform
+    </button>
       <button id="run-btn" class="btn btn-primary" disabled>
         <span class="icon icon-play"></span>
         Execute
@@ -739,6 +924,35 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" id="cancel-settings">Cancel</button>
         <button class="btn btn-primary" id="save-settings">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="modal">
+    <div class="modal-content" style="min-width:700px;max-width:90vw;">
+      <h2>Execution History</h2>
+      <div id="history-list" style="max-height:50vh;overflow:auto;border:1px solid var(--border);border-radius:8px;">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="close-history">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saved Modal -->
+  <div id="saved-modal" class="modal">
+    <div class="modal-content" style="min-width:700px;max-width:90vw;">
+      <h2>Saved Transforms</h2>
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+        <input id="save-name" placeholder="Name" style="flex:1;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:0.5rem;color:var(--text-primary);" />
+            <button class="btn btn-primary" id="save-current" disabled>Save Current</button>
+      </div>
+          <div id="save-validation" class="status-message" style="min-height:1.25rem;"></div>
+      <div id="saved-list" style="max-height:50vh;overflow:auto;border:1px solid var(--border);border-radius:8px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="close-saved">Close</button>
       </div>
     </div>
   </div>
@@ -845,6 +1059,7 @@
         
         const code = await window.electron.generateCode(input, prompt, "js", currentConfig);
         $("code").value = code;
+        updateSaveCurrentState();
         $("run-btn").disabled = false;
       } catch (error) {
         $("code").value = "⚠️ Error: " + error.message;
@@ -855,10 +1070,36 @@
     };
 
     $("run-btn").onclick = async () => {
+      const startedAt = Date.now();
+      const code = $("code").value;
+      const input = $("input").value;
+      const prompt = $("prompt").value;
       try {
         $("result").textContent = "Running transformation...";
-        const out = await window.electron.runJS($("code").value, $("input").value);
+        const out = await window.electron.runJS(code, input);
         $("result").textContent = out;
+
+        // On success, persist an executed version (execute-only autosave)
+        try {
+          await window.electron.saveExecutedVersion({
+            code,
+            input,
+            prompt,
+            result: out,
+            durationMs: Date.now() - startedAt,
+            language: 'js',
+            provider: currentConfig.provider,
+            model: currentConfig.provider === 'ollama' ? (window.OllamaModel || null) : (currentConfig.model || null)
+          });
+          // Refresh local history cache and reset pointer to draft
+          await refreshHistoryCache();
+          setHistoryPointer(-1);
+          // Update library recents and history rail
+          refreshQuickStrip();
+          refreshHistoryRail();
+        } catch (_) {
+          // Non-blocking
+        }
       } catch (e) {
         $("result").textContent = "⚠️ Error: " + e.message;
       }
@@ -901,6 +1142,22 @@
     const apiKeyStatus = document.getElementById('api-key-status');
     const settingsBtn = document.getElementById('settings-btn');
     const providerSwitch = document.getElementById('provider-switch');
+    const historyBtn = document.getElementById('history-btn');
+    const savedBtn = document.getElementById('saved-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const librarySearch = document.getElementById('library-search');
+    const libraryList = document.getElementById('library-list');
+    const quickStrip = document.getElementById('quick-strip');
+    const historyRailList = document.getElementById('history-rail-list');
+    const historyModal = document.getElementById('history-modal');
+    const closeHistory = document.getElementById('close-history');
+    const historyList = document.getElementById('history-list');
+    const savedModal = document.getElementById('saved-modal');
+    const closeSaved = document.getElementById('close-saved');
+    const savedList = document.getElementById('saved-list');
+    const saveCurrentBtn = document.getElementById('save-current');
+    const saveNameInput = document.getElementById('save-name');
+    const saveValidation = document.getElementById('save-validation');
 
     function showSettingsModal() {
       apiKeyInput.value = currentConfig.apiKey;
@@ -984,6 +1241,302 @@
         hideSettingsModal();
       }
     };
+
+    // History modal
+    function showHistoryModal() {
+      historyModal.style.display = 'flex';
+      loadHistory();
+    }
+    function hideHistoryModal() { historyModal.style.display = 'none'; }
+    historyBtn.onclick = showHistoryModal;
+    closeHistory.onclick = hideHistoryModal;
+    historyModal.onclick = (e) => { if (e.target === historyModal) hideHistoryModal(); };
+
+    async function loadHistory() {
+      historyList.innerHTML = '<div style="padding:1rem;color:var(--text-muted)">Loading...</div>';
+      const items = await window.electron.listExecutedVersions(100);
+      if (!items.length) {
+        historyList.innerHTML = '<div style="padding:1rem;">No executions yet.</div>';
+        return;
+      }
+      historyList.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+        div.style.borderBottom = '1px solid var(--border)';
+        const when = new Date(item.ts).toLocaleString();
+        const model = item.fields?.model || '';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+            <div>
+              <div style="font-weight:600;">${when} · ${item.fields?.provider || ''} ${model ? '('+model+')' : ''}</div>
+              <div style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw;">
+                ${escapeHtml((item.execSnapshot?.prompt || '').slice(0, 140))}
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-secondary" data-action="restore">Restore</button>
+              <button class="btn btn-secondary" data-action="copy">Copy Code</button>
+            </div>
+          </div>
+        `;
+        div.querySelector('[data-action="restore"]').onclick = () => restoreFromHistory(item);
+        div.querySelector('[data-action="copy"]').onclick = () => navigator.clipboard.writeText(item.fields?.code || '');
+        historyList.appendChild(div);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+    }
+
+    function restoreFromHistory(item) {
+      $("input").value = item.execSnapshot?.input || '';
+      $("prompt").value = item.execSnapshot?.prompt || '';
+      $("code").value = item.fields?.code || '';
+      $("result").textContent = item.execSnapshot?.result || '';
+      hideHistoryModal();
+    }
+
+    // -----------------------------
+    // Library rail & quick strip
+    // -----------------------------
+    async function loadLibrary(filter = '') {
+      const items = await window.electron.listTransforms();
+      const q = String(filter || '').toLowerCase();
+      const filtered = items.filter(t => !q || (t.name||'').toLowerCase().includes(q));
+      libraryList.innerHTML = '';
+      if (!filtered.length) {
+        libraryList.innerHTML = '<div style="padding:0.75rem;">No saved transforms.</div>';
+        return;
+      }
+      for (const t of filtered) {
+        const row = document.createElement('div');
+        row.className = 'library-item';
+        row.innerHTML = `
+          <div>
+            <div>${escapeHtml(t.name || 'Untitled')}</div>
+            <div class="meta">${t.provider || ''} ${t.model ? '('+t.model+')' : ''}</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-secondary" data-action="insert" style="padding:0.25rem 0.5rem;">Insert</button>
+            <button class="btn btn-secondary" data-action="run" style="padding:0.25rem 0.5rem;">Run</button>
+          </div>
+        `;
+        row.querySelector('[data-action="insert"]').onclick = () => {
+          $("code").value = t.code || '';
+          if (typeof updateSaveCurrentState === 'function') updateSaveCurrentState();
+        };
+        row.querySelector('[data-action="run"]').onclick = async () => {
+          $("code").value = t.code || '';
+          if (typeof updateSaveCurrentState === 'function') updateSaveCurrentState();
+          $("run-btn").click();
+        };
+        libraryList.appendChild(row);
+      }
+    }
+
+    librarySearch.addEventListener('input', () => loadLibrary(librarySearch.value));
+
+    async function refreshQuickStrip() {
+      const items = await window.electron.listTransforms();
+      // Simple recent = by updatedAt desc
+      items.sort((a,b) => new Date(b.updatedAt||b.createdAt).getTime() - new Date(a.updatedAt||a.createdAt).getTime());
+      const top = items.slice(0, 5);
+      quickStrip.innerHTML = '';
+      for (const t of top) {
+        const chip = document.createElement('span');
+        chip.className = 'quick-chip';
+        chip.textContent = t.name || 'Untitled';
+        chip.onclick = () => { $("code").value = t.code || ''; if (typeof updateSaveCurrentState === 'function') updateSaveCurrentState(); };
+        quickStrip.appendChild(chip);
+      }
+    }
+
+    // -----------------------------
+    // History rail
+    // -----------------------------
+    async function refreshHistoryRail() {
+      const items = await window.electron.listExecutedVersions(50);
+      historyRailList.innerHTML = '';
+      if (!items.length) {
+        historyRailList.innerHTML = '<div style="padding:0.75rem;">No executions yet.</div>';
+        return;
+      }
+      for (const item of items) {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        const when = new Date(item.ts).toLocaleString();
+        const model = item.fields?.model || '';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
+            <div>
+              <div style="font-weight:600;">${when}</div>
+              <div class="meta">${item.fields?.provider || ''} ${model ? '('+model+')' : ''}</div>
+              <div style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:17rem;">${escapeHtml(item.execSnapshot?.prompt || '')}</div>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-secondary" data-action="restore" style="padding:0.25rem 0.5rem;">Restore</button>
+            </div>
+          </div>
+        `;
+        div.querySelector('[data-action="restore"]').onclick = () => restoreFromHistory(item);
+        historyRailList.appendChild(div);
+      }
+    }
+
+    // Initial load for new UI pieces
+    loadLibrary('');
+    refreshQuickStrip();
+    refreshHistoryRail();
+
+    // -----------------------------
+    // Undo/Redo via executed versions
+    // -----------------------------
+    let executedHistory = [];
+    let historyPointer = -1; // -1 => current draft; 0 => most recent execution
+
+    async function refreshHistoryCache() {
+      executedHistory = await window.electron.listExecutedVersions(200);
+    }
+
+    function setHistoryPointer(nextPointer) {
+      historyPointer = nextPointer;
+      // enable/disable could be wired to UI later
+    }
+
+    function applyPointer() {
+      if (historyPointer < 0) return; // draft, no change
+      const item = executedHistory[historyPointer];
+      if (!item) return;
+      $("input").value = item.execSnapshot?.input || '';
+      $("prompt").value = item.execSnapshot?.prompt || '';
+      $("code").value = item.fields?.code || '';
+      $("result").textContent = item.execSnapshot?.result || '';
+    }
+
+    function doUndo() {
+      if (!executedHistory.length) return;
+      // move from draft (-1) to 0, else increment pointer if possible
+      if (historyPointer < executedHistory.length - 1) {
+        setHistoryPointer(historyPointer + 1);
+        applyPointer();
+      }
+    }
+
+    function doRedo() {
+      if (historyPointer > -1) {
+        setHistoryPointer(historyPointer - 1);
+        // If we reach -1, it's draft and we do not alter fields automatically
+        if (historyPointer >= 0) applyPointer();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const isUndo = (isMac ? e.metaKey : e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
+      const isRedo = (isMac ? e.metaKey : e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'z';
+      if (isUndo) {
+        e.preventDefault();
+        doUndo();
+      } else if (isRedo) {
+        e.preventDefault();
+        doRedo();
+      }
+    });
+
+    // Saved modal
+    function showSavedModal() {
+      savedModal.style.display = 'flex';
+      loadSaved();
+    }
+    function hideSavedModal() { savedModal.style.display = 'none'; }
+    savedBtn.onclick = showSavedModal;
+    saveBtn.onclick = () => { showSavedModal(); saveNameInput.focus(); if (typeof updateSaveCurrentState === 'function') updateSaveCurrentState(); };
+    closeSaved.onclick = hideSavedModal;
+    savedModal.onclick = (e) => { if (e.target === savedModal) hideSavedModal(); };
+
+    async function loadSaved() {
+      const items = await window.electron.listTransforms();
+      savedList.innerHTML = '';
+      if (!items.length) {
+        savedList.innerHTML = '<div style="padding:1rem;">No saved transforms.</div>';
+        return;
+      }
+      for (const t of items) {
+        const div = document.createElement('div');
+        div.style.padding = '1rem';
+        div.style.borderBottom = '1px solid var(--border)';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+            <div>
+              <div style="font-weight:600;">${escapeHtml(t.name || 'Untitled')}</div>
+              <div style="color:var(--text-muted);font-size:0.85rem;">${t.provider || ''} ${t.model ? '('+t.model+')' : ''} · ${new Date(t.updatedAt||t.createdAt).toLocaleString()}</div>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-secondary" data-action="load">Load</button>
+              <button class="btn btn-secondary" data-action="delete">Delete</button>
+            </div>
+          </div>
+        `;
+        div.querySelector('[data-action="load"]').onclick = () => {
+          $("code").value = t.code || '';
+          currentConfig.provider = t.provider || currentConfig.provider;
+          updateProviderUI();
+          hideSavedModal();
+        };
+        div.querySelector('[data-action="delete"]').onclick = async () => {
+          await window.electron.deleteTransform(t.id);
+          loadSaved();
+        };
+        savedList.appendChild(div);
+      }
+    }
+
+    saveCurrentBtn.onclick = async () => {
+      const name = (saveNameInput.value || '').trim() || 'Untitled Transform';
+      const payload = {
+        name,
+        code: $("code").value,
+        language: 'js',
+        provider: currentConfig.provider,
+        model: currentConfig.provider === 'ollama' ? (window.OllamaModel || null) : (currentConfig.model || null),
+        samplePrompt: $("prompt").value
+      };
+      const res = await window.electron.createTransform(payload);
+      if (res && res.ok) {
+        saveNameInput.value = '';
+        saveValidation.textContent = 'Saved successfully';
+        saveValidation.className = 'status-message success';
+        loadSaved();
+        // update library and quick strip to surface the new transform
+        loadLibrary(librarySearch.value);
+        refreshQuickStrip();
+      } else {
+        saveValidation.textContent = res?.error || 'Failed to save';
+        saveValidation.className = 'status-message error';
+      }
+    };
+
+    // Basic code validation to enable Save Current
+    function codeLooksValid(s) {
+      const str = String(s || '');
+      return /function\s+transform\s*\(\s*text\s*\)/.test(str) || /const\s+transform\s*=\s*\(\s*text\s*\)\s*=>/.test(str);
+    }
+    function updateSaveCurrentState() {
+      const ok = codeLooksValid($("code").value);
+      saveCurrentBtn.disabled = !ok;
+      if (!ok) {
+        saveValidation.textContent = 'Code must define function transform(text)';
+        saveValidation.className = 'status-message warning';
+      } else {
+        saveValidation.textContent = '';
+        saveValidation.className = 'status-message';
+      }
+    }
+    $("code").addEventListener('input', updateSaveCurrentState);
+    // Initialize button state on load
+    updateSaveCurrentState();
 
     // Demo data for showcase
     setTimeout(() => {

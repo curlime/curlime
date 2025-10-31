@@ -18,13 +18,16 @@
 - **Custom API Key UI**: Set and manage your Claude API key from the app.
 - **Provider Selection**: Switch between Claude and local Ollama.
 - **Health Check & Models**: Built-in Ollama health check and available model discovery.
+- **Saved Transforms**: Save current code as a reusable transform.
+- **Execution History**: Browse previous successful runs and restore their input/prompt/code/result.
+- **Execute-only Autosave**: A version is saved only when Execute succeeds.
 
 ---
 
 ## 🚧 Roadmap / Upcoming Features
 
-- [ ] **Save Transformation**: Save generated transformations to reuse next time.
-- [ ] **History & Undo**: View and restore previous prompts, inputs, and results.
+- [x] **Save Transformation**: Save generated transformations to reuse next time.
+- [x] **History & Undo**: Restore previous successful executions; undo/redo navigates versions.
 - [ ] **Export/Import**: Save and load sessions or code snippets.
 - [ ] **Drag & Drop**: Support for dropping files as input.
 - [ ] **In-app Updates**: Notify users of new versions and features.
@@ -54,6 +57,21 @@
    ```bash
    npm start
    ```
+
+---
+
+## 💾 Saved & History
+
+- Saved Transforms:
+  - Open Saved from the top-right.
+  - Enter a name and click “Save Current” to store the code with its provider/model and sample prompt.
+  - Load to bring its code back to the editor; Delete to remove it.
+
+- Execution History:
+  - Click History to see successful executions (execute-only autosave).
+  - Each item shows provider/model, time, and prompt excerpt.
+  - Restore loads its input, prompt, code, and result into the UI.
+  - Keyboard: Undo (Cmd/Ctrl+Z) and Redo (Shift+Cmd/Ctrl+Z) navigate executed versions.
 
 If Ollama is not running, you'll see a warning in the console with quick steps to start it.
 

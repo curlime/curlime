@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
+const os = require('node:os');
 const { NodeVM } = require('vm2');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -285,6 +287,226 @@ module.exports = transform;
 
 ipcMain.handle('run-js', async (event, code, input) => {
   return runJS(code, input);
+});
+
+// -------------------------
+// Executed version persistence
+// -------------------------
+
+function getStoragePaths() {
+  const baseDir = path.join(os.homedir(), '.curlime');
+  const versionsFile = path.join(baseDir, 'versions.jsonl');
+  const transformsIndex = path.join(baseDir, 'transforms.json');
+  return { baseDir, versionsFile, transformsIndex };
+}
+
+function ensureStorage() {
+  const { baseDir, versionsFile, transformsIndex } = getStoragePaths();
+  if (!fs.existsSync(baseDir)) {
+    fs.mkdirSync(baseDir, { recursive: true });
+  }
+  if (!fs.existsSync(versionsFile)) {
+    fs.writeFileSync(versionsFile, '', 'utf8');
+  }
+  if (!fs.existsSync(transformsIndex)) {
+    fs.writeFileSync(transformsIndex, JSON.stringify({ version: 1, transforms: {} }, null, 2), 'utf8');
+  }
+}
+
+function readTransformsIndex() {
+  const { transformsIndex } = getStoragePaths();
+  try {
+    const raw = fs.readFileSync(transformsIndex, 'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    if (!parsed || typeof parsed !== 'object') return { version: 1, transforms: {} };
+    if (!parsed.transforms || typeof parsed.transforms !== 'object') parsed.transforms = {};
+    if (!parsed.version) parsed.version = 1;
+    return parsed;
+  } catch (_) {
+    return { version: 1, transforms: {} };
+  }
+}
+
+function writeTransformsIndexSafe(next) {
+  const { transformsIndex } = getStoragePaths();
+  const tmp = `${transformsIndex}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(next, null, 2), 'utf8');
+  fs.renameSync(tmp, transformsIndex);
+}
+
+function randomId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+ipcMain.handle('save-executed-version', async (event, payload) => {
+  try {
+    ensureStorage();
+    const { versionsFile } = getStoragePaths();
+
+    const versionRecord = {
+      id: randomId(),
+      ts: new Date().toISOString(),
+      label: 'Execute',
+      fields: {
+        code: String(payload.code || ''),
+        language: payload.language || 'js',
+        provider: payload.provider || 'ollama',
+        model: payload.model || null
+      },
+      execSnapshot: {
+        input: String(payload.input || ''),
+        prompt: String(payload.prompt || ''),
+        result: String(payload.result || ''),
+        durationMs: typeof payload.durationMs === 'number' ? payload.durationMs : null,
+        success: true
+      }
+    };
+
+    fs.appendFileSync(versionsFile, JSON.stringify(versionRecord) + '\n', 'utf8');
+
+    // Maintain a minimal index with a single implicit transform for now
+    const index = readTransformsIndex();
+    const transformId = 'default';
+    const current = index.transforms[transformId] || {
+      id: transformId,
+      name: 'Default Transform',
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+      currentVersionId: null,
+      stats: { executes: 0 }
+    };
+    current.updatedAt = versionRecord.ts;
+    current.currentVersionId = versionRecord.id;
+    current.stats.executes = (current.stats.executes || 0) + 1;
+    index.transforms[transformId] = current;
+    writeTransformsIndexSafe(index);
+
+    return { ok: true, versionId: versionRecord.id };
+  } catch (error) {
+    console.error('Failed to save executed version:', error.message);
+    return { ok: false, error: error.message };
+  }
+});
+
+// List recent executed versions (tail from JSONL)
+ipcMain.handle('list-executed-versions', async (event, limit = 50) => {
+  try {
+    ensureStorage();
+    const { versionsFile } = getStoragePaths();
+    const raw = fs.readFileSync(versionsFile, 'utf8');
+    if (!raw) return [];
+    const lines = raw.trim().split('\n');
+    const slice = lines.slice(-Math.max(1, Math.min(500, limit)));
+    const items = [];
+    for (const line of slice) {
+      try {
+        const obj = JSON.parse(line);
+        items.push(obj);
+      } catch (_) {
+        // skip bad line
+      }
+    }
+    // newest last in file; reverse to newest first
+    return items.reverse();
+  } catch (error) {
+    console.error('Failed to list executed versions:', error.message);
+    return [];
+  }
+});
+
+// Minimal transforms list (single default transform for now)
+ipcMain.handle('list-transforms', async () => {
+  try {
+    ensureStorage();
+    const index = readTransformsIndex();
+    return Object.values(index.transforms || {});
+  } catch (error) {
+    console.error('Failed to list transforms:', error.message);
+    return [];
+  }
+});
+
+function validateTransformCode(code) {
+  if (typeof code !== 'string' || !code.trim()) return false;
+  // Basic validation: must define a function transform
+  return /function\s+transform\s*\(\s*text\s*\)/.test(code) || /const\s+transform\s*=\s*\(\s*text\s*\)\s*=>/.test(code);
+}
+
+ipcMain.handle('create-transform', async (event, payload) => {
+  try {
+    ensureStorage();
+    const index = readTransformsIndex();
+    const id = randomId();
+    const now = new Date().toISOString();
+    const code = String(payload.code || '');
+    if (!validateTransformCode(code)) {
+      return { ok: false, error: 'Invalid code: must define function transform(text)' };
+    }
+    const transform = {
+      id,
+      name: String(payload.name || 'Untitled Transform'),
+      language: payload.language || 'js',
+      provider: payload.provider || 'ollama',
+      model: payload.model || null,
+      samplePrompt: payload.samplePrompt || '',
+      code,
+      createdAt: now,
+      updatedAt: now,
+      stats: { uses: 0 }
+    };
+    index.transforms[id] = transform;
+    writeTransformsIndexSafe(index);
+    return { ok: true, id, transform };
+  } catch (error) {
+    console.error('create-transform failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-transform', async (event, id) => {
+  try {
+    ensureStorage();
+    const index = readTransformsIndex();
+    return index.transforms[id] || null;
+  } catch (error) {
+    console.error('get-transform failed:', error.message);
+    return null;
+  }
+});
+
+ipcMain.handle('update-transform', async (event, id, fields) => {
+  try {
+    ensureStorage();
+    const index = readTransformsIndex();
+    const existing = index.transforms[id];
+    if (!existing) return { ok: false, error: 'Not found' };
+    const next = { ...existing, ...fields, updatedAt: new Date().toISOString() };
+    if (fields && Object.prototype.hasOwnProperty.call(fields, 'code')) {
+      if (!validateTransformCode(String(fields.code || ''))) {
+        return { ok: false, error: 'Invalid code: must define function transform(text)' };
+      }
+    }
+    index.transforms[id] = next;
+    writeTransformsIndexSafe(index);
+    return { ok: true };
+  } catch (error) {
+    console.error('update-transform failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-transform', async (event, id) => {
+  try {
+    ensureStorage();
+    const index = readTransformsIndex();
+    if (!index.transforms[id]) return { ok: false, error: 'Not found' };
+    delete index.transforms[id];
+    writeTransformsIndexSafe(index);
+    return { ok: true };
+  } catch (error) {
+    console.error('delete-transform failed:', error.message);
+    return { ok: false, error: error.message };
+  }
 });
 
 // Perform health check on startup
